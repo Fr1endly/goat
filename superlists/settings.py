@@ -16,16 +16,14 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '&if1vf^t^6#ohg!@&jb0l0%9z(p1r)ppiys^8o2mt9ftvet6n$'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
+if DJANGO_DEBUG_FALSE in os.environ:
+    SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+    DEBUG = False
+    ALLOWED_HOSTS = [os.environ['SITENAME']]
+else:
+    DEBUG = True
+    SECRET_KEY = 'Insecure key for dev'
+    ALLOWED_HOSTS = []
 
 
 # Application definition
