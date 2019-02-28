@@ -1,32 +1,29 @@
-from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-import os
-import time
+from .base import FunctionalTest
+from unittest import skip
+from selenium.webdriver.common.keys import Keys
 
-MAX_WAIT = 10
+class ItemValidationTest(FunctionalTest):
+    #Edith goes to home page and accidently submits empty list item by pressing enter 
+    def test_cannot_add_empty_list_items(self):
+        self.browser.get(self.live_server_url)
+        self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
 
-class FunctionalTest(StaticLiveServerTestCase):
-
-    def setUp(self):
-        self.browser = webdriver.Firefox()
-        staging_server = os.environ.get('STAGING_SERVER')
-        if staging_server:
-            self.live_server_url = "http://" + staging_server
-
-    def tearDown(self):
-        self.browser.quit()
-
-    def wait_for_row_in_list_table(self, row_text):
-        start_time  = time.time()
-        while True:
-            try:       
-                table = self.browser.find_element_by_id('id_list_table')
-                rows = table.find_elements_by_tag_name('tr')
-                self.assertIn(row_text, [row.text for row in rows])
-                return
-            except (AssertionError, WebDriverException) as e:
-                if time.time() - start_time > MAX_WAIT:
-                    raise e
-            time.sleep(0.5)
-
+    #Home page refreshes 
+        self.wait_for(lambda: self.assertEqual(
+            self.browser.find_element_by_css_selector('.has-error').text, 
+            "You can't have and empty list item"
+        ))
+    #She tries with some text now, which works
+        self.browser.find_element_by_id('id_new_item').send_keys('Buy milk')
+        self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy milk')
+    #And then again accidently send blank list item
+        self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
+        self.wait_for(lambda: self.assertEqual(self.browser.find_element_by_css_selector('.has-error').text, 
+        "You can't have and empty list item"
+        ))
+        #And now she corrects it by entering some items
+        self.browser.find_element_by_id('id_new_item').send_keys('Make tea')
+        self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy milk')
+        self.wait_for_row_in_list_table('2: Make tea')  
