@@ -11,7 +11,7 @@ class ItemValidationTest(FunctionalTest):
     #Home page refreshes 
         self.wait_for(lambda: self.assertEqual(
             self.browser.find_element_by_css_selector('.has-error').text, 
-            "You can't have and empty list item"
+            "You can't have an empty list item"
         ))
     #She tries with some text now, which works
         self.browser.find_element_by_id('id_new_item').send_keys('Buy milk')
@@ -20,8 +20,7 @@ class ItemValidationTest(FunctionalTest):
     #And then again accidently send blank list item
         self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
         self.wait_for(lambda: self.assertEqual(self.browser.find_element_by_css_selector('.has-error').text, 
-        "You can't have and empty list item"
-        ))
+        "You can't have an empty list item"))
         #And now she corrects it by entering some items
         self.browser.find_element_by_id('id_new_item').send_keys('Make tea')
         self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
