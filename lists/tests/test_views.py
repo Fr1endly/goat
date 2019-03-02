@@ -5,6 +5,8 @@ from lists.views import home_page
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from lists.models import List, Item
+from lists.forms import ItemForm
+
 
 class HomePageTest(TestCase):
 
@@ -15,6 +17,10 @@ class HomePageTest(TestCase):
     def test_saves_items_only_when_neccesary(self):
         self.client.get('/')
         self.assertEqual(Item.objects.count(), 0)
+
+    def test_home_page_uses_item_form(self):
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], ItemForm)
 
 
 class ListViewTest(TestCase):
