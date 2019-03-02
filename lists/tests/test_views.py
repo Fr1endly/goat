@@ -1,5 +1,6 @@
 from django.test import TestCase
-from django.urls import resolve 
+from django.urls import resolve
+from django.utils.html import escape
 from lists.views import home_page
 from django.http import HttpRequest
 from django.template.loader import render_to_string
@@ -82,8 +83,19 @@ class NewItemTest(TestCase):
             f'/lists/{correct_list.id}/add_item',
             data = {'item_text' : 'A new item for an existing list'}
         )
-
         self.assertRedirects(response, f'/lists/{correct_list.id}/')
+
+    def test_validation_error_are_sent_back_to_home_page_template(self):
+        response = self.client.post('/lists/new', data={'item_text' : ''})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'home.html')
+        expected_error = "You can't have and empty list item"
+        self.assertContains(response, escape(expected_error))
+
+    def test_invalid_list_items_are_not_saved(self):
+        self.client.post('/lists/new', data={'item_text' : ''})
+        self.assertEqual(List.objects.count(), 0)
+        self.assertEqual(Item.objects.count(), 0)
 
 
 
