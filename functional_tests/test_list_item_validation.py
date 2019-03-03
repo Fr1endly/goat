@@ -8,21 +8,33 @@ class ItemValidationTest(FunctionalTest):
         self.browser.get(self.live_server_url)
         self.get_item_input_box().send_keys(Keys.ENTER)
 
-    #Home page refreshes 
-        self.wait_for(lambda: self.assertEqual(
-            self.browser.find_element_by_css_selector('.has-error').text, 
-            "You can't have an empty list item"
+    #The browser intercepts the ruequest, and doesn't load the list page
+        self.wait_for(lambda: self.browser.find_element_by_css_selector(
+            '#id_text:invalid'
         ))
-    #She tries with some text now, which works
+
+    #She starts typing some text for new item and the error disappears
         self.get_item_input_box().send_keys('Buy milk')
+        self.wait_for(lambda: self.browser.find_element_by_css_selector(
+            '#id_text:valid'
+        ))
+
+    #And now she can submit it successfully 
         self.get_item_input_box().send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: Buy milk')
-    #And then again accidently send blank list item
+
+    #And then again accidently send blank list 
+    #Browser does not comply 
         self.get_item_input_box().send_keys(Keys.ENTER)
-        self.wait_for(lambda: self.assertEqual(self.browser.find_element_by_css_selector('.has-error').text, 
-        "You can't have an empty list item"))
-        #And now she corrects it by entering some items
+        self.wait_for(lambda: self.browser.find_elements_by_css_selector(
+            '#id_text:valid'
+        ))
+
+    #And she can correct it by filling some tex in 
         self.get_item_input_box().send_keys('Make tea')
+        self.wait_for(lambda: self.browser.find_element_by_css_selector(
+            '#id_text:valid'
+        ))
         self.get_item_input_box().send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: Buy milk')
-        self.wait_for_row_in_list_table('2: Make tea')  
+        self.wait_for_row_in_list_table('2: Make tea')
